@@ -1,0 +1,9 @@
+# NodeJS
+package-lock.json
+dist/
+node_modules/
+
+# Python scripts
+venv/
+__pycache__/
+scripts/output/*.png
