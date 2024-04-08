@@ -15,13 +15,24 @@ All accessories should be placed in the `accessories/` folder.
 ## Using the API
 
 Check out the following links, where `PLAYER` is the player's name:
-- Get a player's skin: http://localhost:3000/skin/PLAYER
-- Get a list of available accessories: http://localhost:3000/accessories
-- Get a player's skin with an accessory: http://localhost:3000/merge/?user=PLAYER&accessory=jacket
+- **Get a player's skin:** http://localhost:3000/skin/PLAYER
+- **Get a list of available accessories:** http://localhost:3000/accessories (the ones starting with an underscore are for testing purposes)
+- **Get a player's skin with an accessory:** http://localhost:3000/merge/?user=PLAYER&accessory=jacket
+- **Get an online skin with an accessory:** http://localhost:3000/merge/?url=http%3A%2F%2Flocalhost%3A3000%2Fskin%2FPLAYER&accessory=jacket (you might want to use another link to get the skin)
 
-This API should work no matter what the player's skin is (64x32 or 64x64, slim or wide arms), as long as it's a valid skin.
+The last one requires the `url` query parameter to be encoded. You can use the following javascript code to encode it:
+```js
+encodeURIComponent('http://localhost:3000/skin/PLAYER')
+```
 
-Result, if the player has a the default Steve skin:
+Or in Java:
+```java
+URLEncoder.encode("http://localhost:3000/skin/PLAYER", StandardCharsets.UTF_8.toString());
+```
+
+This API should work **no matter what the player's skin** is (64x32 or 64x64, slim or wide arms), as long as it's a valid skin. The accessories adapt to the skin's dimensions, see [Python scripts](./scripts/README.md) for more details.
+
+Result, if the player has a the default Steve skin, with `/skin/PLAYER`:
 
 <div style="display: flex; justify-content: center;">
 
@@ -31,15 +42,13 @@ Result, if the player has a the default Steve skin:
 
 </div>
 
-(Note the accessories starting with an underscore should only be used for testing purposes)
+The skin is made with a first layer and an overlay. When the accessory has pixels on the first layer and the skin has pixels on the overlay, the skin pixels on the overlay will be hidden to show the accessory if `hide_overlay` is set to `true` (default behavior).
 
-The skin is made with a first layer and an overlay. When the accessory has pixels on the first layer and the skin has pixels on the overlay, the skin pixels on the overlay will be hidden to show the accessory.
-
-> Be careful when you use a generated skin, make sure to choose the right dimensions (slim or wide arms) on the launcher. If you're not sure, use the `scripts/is_slim.py` script.
+> Be careful when you use a generated skin, **make sure to choose the right dimensions on the launcher** (slim or wide arms). If you're not sure, use the `scripts/is_slim.py` script to check the skin type.
 
 ## Modifying the accessories
 
-See the [Python scripts](./scripts/README.md) to modify the accessories.
+See the [Python scripts](./scripts/README.md) to modify the accessories or get more details on how conversions are made.
 
 ## See also
 

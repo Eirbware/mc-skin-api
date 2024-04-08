@@ -1,15 +1,12 @@
-import fs from 'fs';
 import express from 'express';
-import { applyAccessory, fetchSkin } from './skin';
+import * as handlers from './handlers';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // List available accessories
 app.get('/accessories', (req, res) => {
-	const files = fs.readdirSync('accessories');
-	const accessories = files.map(file => file.replace('.png', ''));
-	res.json(accessories);
+	res.json(handlers.getAccessories());
 });
 
 // Fetch default user skin
@@ -22,7 +19,7 @@ app.get('/skin/:username', async (req, res) => {
 		return res.status(400).send('User field must be a string');
 
 	// Fetch skin and send response
-	let skin = await fetchSkin(user);
+	let skin = await handlers.fetchSkin(user);
 	if (skin === null)
 		return res.status(404).send('User not found');
 
@@ -32,13 +29,18 @@ app.get('/skin/:username', async (req, res) => {
 });
 
 // Apply accessory to user skin
+// Supported query parameters:
+// - user: Minecraft username
+// - url: Skin URL (exclusive with user)
+// - accessory: Accessory name
+// - hide_overlay: Hide the skin overlay (default: true)
 app.get('/merge', async (req, res) => {
-	// Parse user field
-	const user = req.query.user;
-	if (!user)
-		return res.status(400).send('Missing user field');
-	if (typeof user !== 'string')
-		return res.status(400).send('User field must be a string');
+	const t = performance.now();
+
+	if (!req.query.user && !req.query.url)
+		return res.status(400).send('Missing user or url field');
+	if (req.query.user && req.query.url)
+		return res.status(400).send('Provide only one of user or url fields');
 
 	// Parse accessory field
 	let accessory = req.query.accessory;
@@ -47,17 +49,40 @@ app.get('/merge', async (req, res) => {
 	if (typeof accessory !== 'string')
 		return res.status(400).send('Accessory field must be a string');
 	accessory = accessory.replace(/[^a-z0-9_]/gi, '');
-	if (!fs.existsSync(`accessories/${accessory}.png`))
+	if (!handlers.accessoryExists(accessory))
 		return res.status(404).send('Accessory not found');
 
-	// Apply accessory and send response
-	const skin = await applyAccessory(user, `accessories/${accessory}.png`);
+	// Parse user and url fields
+	const user = req.query.user;
+	if (user && typeof user !== 'string')
+		return res.status(400).send('User field must be a string');
+	let url = req.query.url;
+	if (url && typeof url !== 'string')
+		return res.status(400).send('URL field must be a string');
+	if (url)
+		url = decodeURIComponent(url);
+
+	// Parse hideOverlay field
+	const hideOverlay = !(req.query.hide_overlay === 'false');
+
+	// Apply accessory on skin
+	let skin;
+	if (user)
+		skin = await handlers.applyWithUsername(user, accessory, hideOverlay);
+	else if (url)
+		skin = await handlers.applyWithURL(url, accessory, hideOverlay);
+
 	if (skin === null)
-		return res.status(404).send('User not found');
+		return res.status(404).send('Error fetching skin');
+
+	// Send response
+	const filename = user ? `${user}_${accessory}` : `skin_${accessory}`;
 
 	res.set('Content-Type', 'image/png');
-	res.set('Content-Disposition', `attachment; filename=${user}_${accessory}.png`);
+	res.set('Content-Disposition', `attachment; filename=${filename}.png`);
 	res.send(skin);
+
+	console.log(`Processed in ${performance.now() - t}ms`);
 });
 
 app.listen(port, () => {

@@ -70,50 +70,8 @@ export function toSlim(image: Image): Image {
 	return output;
 }
 
-function inRect(x: number, y: number, x1: number, y1: number, x2: number, y2: number): boolean {
-	return x >= x1 && x < x2 && y >= y1 && y < y2;
-}
-
-const isHead = (x: number, y: number): boolean => inRect(x, y, 8, 0, 24, 8) || inRect(x, y, 0, 8, 32, 16);
-const isBody = (x: number, y: number): boolean => inRect(x, y, 20, 16, 36, 20) || inRect(x, y, 16, 20, 40, 32);
-const isRLeg = (x: number, y: number): boolean => inRect(x, y, 4, 16, 12, 20) || inRect(x, y, 0, 20, 16, 32);
-const isRArm = (x: number, y: number): boolean => inRect(x, y, 44, 16, 52, 20) || inRect(x, y, 40, 20, 56, 32);
-const isLLeg = (x: number, y: number): boolean => inRect(x, y, 20, 48, 28, 52) || inRect(x, y, 16, 52, 32, 64);
-const isLArm = (x: number, y: number): boolean => inRect(x, y, 36, 48, 44, 52) || inRect(x, y, 32, 52, 48, 64);
-
-const toHead = (x: number, y: number): [number, number] => [x + 32, y];
-const toBody = (x: number, y: number): [number, number] => [x, y + 16];
-const toRLeg = (x: number, y: number): [number, number] => [x, y + 16];
-const toRArm = (x: number, y: number): [number, number] => [x, y + 16];
-const toLLeg = (x: number, y: number): [number, number] => [x - 16, y];
-const toLArm = (x: number, y: number): [number, number] => [x + 16, y];
-
-const parts: [((x: number, y: number) => boolean), ((x: number, y: number) => [number, number])][] = [
-	[isHead, toHead],
-	[isBody, toBody],
-	[isRLeg, toRLeg],
-	[isRArm, toRArm],
-	[isLLeg, toLLeg],
-	[isLArm, toLArm]
-];
-
-// Clear the pixel above if the skin's overlay hides it
-export function clearOverlay(skin: Image, accessory: Image, x: number, y: number) {
-	// Find the skin part the pixel belongs to
-	for (const [isPart, toPart] of parts) {
-		// Check if the pixel is part of the current skin part
-		if (!isPart(x, y))
-			continue;
-		const [nx, ny] = toPart(x, y);
-		// Check if the accessory is transparent on the pixel above (x, y)
-		if (!accessory.isEmpty(nx, ny))
-			continue;
-		skin.clearPixel(...toPart(x, y));
-	}
-}
-
-// Rudimentary check to see if the image is a slim accessory
-export function isAccessorySlim(image: Image): boolean {
+// Rudimentary check to see if the given skin / accessory is slim
+export function isSlim(image: Image): boolean {
 	const right = image.isRectEmpty(50, 16, 52, 20) && image.isRectEmpty(54, 20, 56, 32);
 	const left = image.isRectEmpty(42, 48, 44, 52) && image.isRectEmpty(46, 52, 48, 64);
 	return right && left;
@@ -123,7 +81,7 @@ export function isAccessorySlim(image: Image): boolean {
 // Pixels far from the body are duplicated to obtain 4px arms
 export function toWide(image: Image): Image {
 	const output = Image.copy(image);
-	
+
 	function copyRightArm(xo: number, yo: number) {
 		// Bottom
 		output.blit(image, 47 + xo, 16 + yo, 3, 4, 49 + xo, 16 + yo);
@@ -157,11 +115,11 @@ export function toWide(image: Image): Image {
 		output.clearRect(39 + xo, 48 + yo, 39 + xo, 51 + yo);
 		// Duplicate bottom line
 		output.blit(image, 41 + xo, 48 + yo, 1, 4, 43 + xo, 48 + yo);
-		
+
 
 		// Top, duplicate the same line
 		output.blit(image, 38 + xo, 48 + yo, 1, 4, 39 + xo, 48 + yo);
-		
+
 
 		// Back
 		output.blit(image, 43 + xo, 52 + yo, 3, 12, 45 + xo, 52 + yo);

@@ -60,11 +60,9 @@ export default class Image {
 	}
 
 	clearRect(x1: number, y1: number, x2: number, y2: number) {
-		for (let y = y1; y <= y2; y++) {
-			for (let x = x1; x <= x2; x++) {
+		for (let y = y1; y <= y2; y++)
+			for (let x = x1; x <= x2; x++)
 				this.clearPixel(x, y);
-			}
-		}
 	}
 
 	isEmpty(x: number, y: number): boolean {
@@ -72,12 +70,18 @@ export default class Image {
 	}
 
 	isRectEmpty(x1: number, y1: number, x2: number, y2: number): boolean {
-		for (let y = y1; y < y2; y++) {
-			for (let x = x1; x < x2; x++) {
+		for (let y = y1; y < y2; y++)
+			for (let x = x1; x < x2; x++)
 				if (!this.isEmpty(x, y))
 					return false;
-			}
-		}
+		return true;
+	}
+
+	isOpaque(): boolean {
+		for (let y = 0; y < this.height; y++)
+			for (let x = 0; x < this.width; x++)
+				if (this.obj.data[this._getIndex(x, y) + 3] !== 255)
+					return false;
 		return true;
 	}
 
