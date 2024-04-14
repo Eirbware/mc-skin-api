@@ -3,4 +3,9 @@ services:
     restart: unless-stopped
     build: .
     ports:
-      - "3000:3000"
+      - 3000:3000
+    volumes:
+      - type: bind
+        source: ./accessories
+        target: /app/accessories
+        read_only: true
