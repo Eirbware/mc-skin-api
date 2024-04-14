@@ -5,9 +5,23 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // List available accessories
-app.get('/accessories', (req, res) => {
-	res.json(handlers.getAccessories());
+app.get('/accessories', async (req, res) => {
+	res.json(await handlers.getAccessories());
 });
+
+app.get('/skins', async (req, res) => {
+	res.json(await handlers.getSkins());
+})
+
+app.get('/skins/:skin', async (req, res) => {
+	const skinName = req.params.skin;
+	let skin = await handlers.getSkin(skinName);
+	if(skin == null)
+		return res.status(404).send('Skin not found');
+	res.set('Content-Type', 'image/png');
+	res.set('Content-Disposition', `attachment; filename=${skinName}.png`);
+	res.send(skin);
+})
 
 // Fetch default user skin
 app.get('/skin/:username', async (req, res) => {
@@ -49,7 +63,7 @@ app.get('/merge', async (req, res) => {
 	if (typeof accessory !== 'string')
 		return res.status(400).send('Accessory field must be a string');
 	accessory = accessory.replace(/[^a-z0-9_]/gi, '');
-	if (!handlers.accessoryExists(accessory))
+	if (!(await handlers.accessoryExists(accessory)))
 		return res.status(404).send('Accessory not found');
 
 	// Parse user and url fields
