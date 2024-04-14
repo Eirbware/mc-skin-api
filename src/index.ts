@@ -38,7 +38,7 @@ app.get('/merge', async (req, res) => {
 	const t = performance.now();
 
 	if (!req.query.user && !req.query.url)
-		return res.status(400).send('Missing user or url field');
+		return res.status(400).send('Missing user or url field in url' + req.url);
 	if (req.query.user && req.query.url)
 		return res.status(400).send('Provide only one of user or url fields');
 
