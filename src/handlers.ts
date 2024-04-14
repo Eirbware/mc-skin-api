@@ -31,17 +31,17 @@ export async function getSkin(skinName: string): Promise<Buffer | null> {
 		await fsPromises.access(path, fs.constants.F_OK | fs.constants.R_OK);
 		const img = Image.fromFile(getSkinPath(skinName));
 		return img.getBuffer();
-	}catch(e){
+	} catch (e) {
 		console.log(e);
 		return null;
 	}
 }
 
 export async function accessoryExists(accessory: string): Promise<boolean> {
-	try{
+	try {
 		await fsPromises.access(getAccessoryPath(accessory), fs.constants.F_OK | fs.constants.R_OK);
 		return true;
-	}catch{
+	} catch {
 		return false;
 	}
 }

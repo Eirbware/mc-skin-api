@@ -16,7 +16,7 @@ app.get('/skins', async (req, res) => {
 app.get('/skins/:skin', async (req, res) => {
 	const skinName = req.params.skin;
 	let skin = await handlers.getSkin(skinName);
-	if(skin == null)
+	if (skin == null)
 		return res.status(404).send('Skin not found');
 	res.set('Content-Type', 'image/png');
 	res.set('Content-Disposition', `attachment; filename=${skinName}.png`);
