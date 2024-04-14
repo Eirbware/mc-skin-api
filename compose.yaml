@@ -9,3 +9,7 @@ services:
         source: ./accessories
         target: /app/accessories
         read_only: true
+      - type: bind
+        source: ./skins
+        target: /app/skins
+        read_only: true
