@@ -15,6 +15,8 @@ All accessories should be placed in the `accessories/` folder.
 ## Using the API
 
 Check out the following links, where `PLAYER` is the player's name:
+- **Get a list of available skins in the `/skins` folder:** http://localhost:3000/skins
+- **Get a skin available in the `/skins` folder:** http://localhost:3000/skins/steve
 - **Get a player's skin:** http://localhost:3000/skin/PLAYER
 - **Get a list of available accessories:** http://localhost:3000/accessories (the ones starting with an underscore are for testing purposes)
 - **Get a player's skin with an accessory:** http://localhost:3000/merge/?user=PLAYER&accessory=jacket
